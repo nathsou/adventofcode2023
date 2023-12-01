@@ -1,50 +1,129 @@
 import scala.io.Source
 import scala.collection.mutable.ArrayBuffer
 
-object Day1 {
-  def part1(): Int =
-    val lines = Source.fromFile("input.txt").getLines().toList
-    lines.map(line => {
-        val digits = line.filter(_.isDigit).toList
-        val concat = digits(0).toString() + digits(digits.length - 1).toString()
-        concat.toInt
-    }).sum
 
-  def part2(): Int =
+object Day1 {
+    def part1(): Int =
         val lines = Source.fromFile("input.txt").getLines().toList
-        val digits = Map(
-            "one" -> 1,
-            "two" -> 2,
-            "three" -> 3,
-            "four" -> 4,
-            "five" -> 5,
-            "six" -> 6,
-            "seven" -> 7,
-            "eight" -> 8,
-            "nine" -> 9,
-        )
+        lines.map(line =>
+            val digits = line.filter(_.isDigit).toArray
+            (digits(0).toString() + digits.last.toString()).toInt
+            ).sum
+            
+    def part2(): Int =
+        extension (str: String)
+            def at(index: Int): Char | Null =
+                if index >= str.length then null
+                else str(index)
+
+        val lines = Source.fromFile("input.txt").getLines().toArray
+
+        // manual implementation of a trie for the digits
+        def getDigit(str: String, index: Int): Option[(Int, Int)] =
+            str.at(index) match {
+                case 'o' => str.at(index + 1) match {
+                    case 'n' => str.at(index + 2) match {
+                        case 'e' => Some((1, 3))
+                        case _ => None
+                    }
+                    case _ => None
+                }
+                case 't' => str.at(index + 1) match {
+                    case 'w' => str.at(index + 2) match {
+                        case 'o' => Some((2, 3))
+                        case _ => None
+                    }
+                    case 'h' => str.at(index + 2) match {
+                        case 'r' => str.at(index + 3) match {
+                            case 'e' => str.at(index + 4) match {
+                                case 'e' => Some((3, 5))
+                                case _ => None
+                            }
+                            case _ => None
+                        }
+                        case _ => None
+                    }
+                    case _ => None
+                }
+                case 'f' => str.at(index + 1) match {
+                    case 'o' => str.at(index + 2) match {
+                        case 'u' => str.at(index + 3) match {
+                            case 'r' => Some((4, 4))
+                            case _ => None
+                        }
+                        case _ => None
+                    }
+                    case 'i' => str.at(index + 2) match {
+                        case 'v' => str.at(index + 3) match {
+                            case 'e' => Some((5, 4))
+                            case _ => None
+                        }
+                        case _ => None
+                    }
+                    case _ => None
+                }
+                case 's' => str.at(index + 1) match {
+                    case 'i' => str.at(index + 2) match {
+                        case 'x' => Some((6, 3))
+                        case _ => None
+                    }
+                    case 'e' => str.at(index + 2) match {
+                        case 'v' => str.at(index + 3) match {
+                            case 'e' => str.at(index + 4) match {
+                                case 'n' => Some((7, 5))
+                                case _ => None
+                            }
+                            case _ => None
+                        }
+                        case _ => None
+                    }
+                    case _ => None
+                }
+                case 'e' => str.at(index + 1) match {
+                    case 'i' => str.at(index + 2) match {
+                        case 'g' => str.at(index + 3) match {
+                            case 'h' => str.at(index + 4) match {
+                                case 't' => Some((8, 5))
+                                case _ => None
+                            }
+                            case _ => None
+                        }
+                        case _ => None
+                    }
+                    case _ => None
+                }
+                case 'n' => str.at(index + 1) match {
+                    case 'i' => str.at(index + 2) match {
+                        case 'n' => str.at(index + 3) match {
+                            case 'e' => Some((9, 4))
+                            case _ => None
+                        }
+                        case _ => None
+                    }
+                    case _ => None
+                }
+                case _ => None
+            }
 
         def getDigits(line: String): ArrayBuffer[Int] =
-            var res = ArrayBuffer[Int]()
-            
-            Range(0, line.length).foreach(i => {
-                if (line(i).isDigit) {
-                    res.addOne(line(i).toString().toInt)
-                } else {
-                    for ((key, value) <- digits.iterator) {
-                        if (line.slice(i, line.length()).startsWith(key)) {
-                            res.addOne(value)
-                        }
-                    }
-                }
-            })
+            val digits = ArrayBuffer[Int]()
+            var index = 0
 
-            res
-                
+            while index < line.length do
+                if line(index).isDigit then
+                    digits += line.at(index).toString().toInt
+                    index += 1
+                else getDigit(line, index) match
+                    case Some((digit, len)) =>
+                        digits += digit
+                        index += len - 1
+                    case None => index += 1
+
+            digits
 
         lines.map(line => {
             val digits = getDigits(line)
-            (digits(0).toString() + digits(digits.length - 1).toString()).toInt
+            (digits(0).toString() + digits.last.toString()).toInt
         }).sum
 }
 
