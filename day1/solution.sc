@@ -1,16 +1,16 @@
 import scala.io.Source
 import scala.collection.mutable.ArrayBuffer
 
-
 object Day1 {
-    def part1(): Int =
-        val lines = Source.fromFile("input.txt").getLines().toList
+    def part1(input: String = "input.txt"): Int =
+        val lines = Source.fromFile(input).getLines().toList
         lines.map(line =>
             val digits = line.filter(_.isDigit).toArray
-            (digits(0).toString() + digits.last.toString()).toInt
-            ).sum
+            if digits.isEmpty then 0
+            else (digits(0).toString() + digits.last.toString()).toInt
+        ).sum
             
-    def part2(): Int =
+    def part2(input: String = "input.txt"): Int =
         extension (str: String)
             def at(index: Int): Char | Null =
                 if index >= str.length then null
@@ -128,4 +128,4 @@ object Day1 {
 }
 
 println(Day1.part1())
-println(Day1.part2())
+println(Day1.part2("sample.txt"))
