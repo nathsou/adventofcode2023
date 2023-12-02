@@ -4,37 +4,33 @@ object Day2 {
     type Rgb = (Int, Int, Int)
     case class Game(id: Int, rounds: Seq[Rgb])
 
-    def keepDigits(line: String): Int = line.filter(_.isDigit).toInt
-
     def parseGame(line: String): Game =
-        // Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-        val parts = line.split(":")
-        val id = parts(0).split(" ")(1).toInt
-        val rounds = parts(1).split(";").map(_.trim).map { round =>
-            val colors = round.split(",")
-            var red, green, blue = 0
+        line match
+            case s"Game $id: $rhs" =>
+                val rounds = rhs.split(";").map { round =>
+                    var red, green, blue = 0
 
-            colors.foreach(color =>
-                if color.contains("red") then red = keepDigits(color)
-                if color.contains("green") then green = keepDigits(color)
-                if color.contains("blue") then blue = keepDigits(color)
-            )
+                    round.split(",").foreach { color => color match
+                        case s"$n red" => red = n.trim.toInt
+                        case s"$n green" => green = n.trim.toInt
+                        case s"$n blue" => blue = n.trim.toInt
+                    }
 
-            (red, green, blue)
-        }
+                    (red, green, blue)
+                }
 
-        Game(id, rounds)
+                Game(id.toInt, rounds)
 
-    def parseInput(): Iterator[Game] =
-        Source.fromFile("input.txt").getLines.map(parseGame)
+    def parseInput(input: String): Iterator[Game] =
+        Source.fromFile(input).getLines.map(parseGame)
 
     def part1(input: String = "input.txt"): Int =
-        parseInput().filter(_.rounds.forall((r, g, b) => 
+        parseInput(input).filter(_.rounds.forall((r, g, b) => 
             r <= 12 && g <= 13 && b <= 14
         )).map(_.id).sum
             
     def part2(input: String = "input.txt"): Int =
-        parseInput().map(game =>
+        parseInput(input).map(game =>
             val r = game.rounds.map((r, _, _) => r).max
             val g = game.rounds.map((_, g, _) => g).max
             val b = game.rounds.map((_, _, b) => b).max
