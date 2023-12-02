@@ -3,11 +3,10 @@ import scala.collection.mutable.ArrayBuffer
 
 object Day1 {
     def part1(input: String = "input.txt"): Int =
-        val lines = Source.fromFile(input).getLines().toList
-        lines.map(line =>
+        Source.fromFile(input).getLines.map(line =>
             val digits = line.filter(_.isDigit).toArray
             if digits.isEmpty then 0
-            else (digits(0).toString() + digits.last.toString()).toInt
+            else s"${digits(0)}${digits.last}".toInt
         ).sum
             
     def part2(input: String = "input.txt"): Int =
@@ -16,7 +15,7 @@ object Day1 {
                 if index >= str.length then null
                 else str(index)
 
-        val lines = Source.fromFile("input.txt").getLines().toArray
+        val lines = Source.fromFile("input.txt").getLines
 
         // manual implementation of a trie for the digits
         def getDigit(str: String, index: Int): Option[(Int, Int)] =
@@ -123,9 +122,9 @@ object Day1 {
 
         lines.map(line => {
             val digits = getDigits(line)
-            (digits(0).toString() + digits.last.toString()).toInt
+            s"${digits(0)}${digits.last}".toInt
         }).sum
 }
 
 println(Day1.part1())
-println(Day1.part2("sample.txt"))
+println(Day1.part2())
