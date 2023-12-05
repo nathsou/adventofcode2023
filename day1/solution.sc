@@ -115,6 +115,8 @@ object Day1 {
                 else getDigit(line, index) match
                     case Some((digit, len)) =>
                         digits += digit
+                        // len - 1 since the last letter of a digit can be the first letter of the next digit
+                        // e.g eightwoneight: eight, two, one, eight
                         index += len - 1
                     case None => index += 1
 

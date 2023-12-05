@@ -6,7 +6,7 @@ object Day3 {
 
     def parseInput(input: String): IndexedSeq[Num] =
         val lines = Source.fromFile(input).getLines.toArray
-        var nums = ArrayBuffer[Num]()
+        val nums = ArrayBuffer[Num]()
         var col = 0
 
         for y <- 0 until lines.length do
@@ -38,7 +38,7 @@ object Day3 {
         val lines = Source.fromFile(input).getLines.toArray
 
         def boundaryAround(x: Int, y: Int, len: Int): Seq[(Int, Int)] =
-            var boundary = ArrayBuffer[(Int, Int)]()
+            val boundary = ArrayBuffer[(Int, Int)]()
             boundary.addOne((x - 1, y)) // left
             boundary.addOne((x + len, y)) // right
 
@@ -54,7 +54,7 @@ object Day3 {
             
     def part2(input: String = "input.txt"): Int =
         val lines = Source.fromFile(input).getLines.toArray
-        var nums = Map[(Int, Int), (Int, Int)]()
+        val nums = Map[(Int, Int), (Int, Int)]()
         for num <- parseInput(input) do
             val id = nums.size
             for i <- 0 until num.len do
@@ -71,7 +71,7 @@ object Day3 {
         var sum = 0
         for y <- 0 until lines.length do
             for x <- 0 until lines(y).length do
-                if (lines.at(x, y) == '*') {
+                if lines.at(x, y) == '*' then
                     val adjacent = nums
                         .filter((pos, num) => isAdjacentTo(x, y, pos._1, pos._2))
                         .values
@@ -82,7 +82,6 @@ object Day3 {
 
                     if adjacent.size == 2 then
                         sum += adjacent(0) * adjacent(1)
-                }
 
         sum
 }
