@@ -1,6 +1,5 @@
 import scala.io.Source
 import scala.collection.mutable._
-import sourcecode.Text.generate
 
 object Day5 {
   case class Range(dest: Long, src: Long, len: Long)
