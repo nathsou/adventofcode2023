@@ -14,11 +14,11 @@ object Day6 {
     def wins: Long = (0L until r.time).count(v => v * (r.time - v) > r.distance)
 
   def part1(input: String = "input.txt"): Long =
-    val races = Source.fromFile(input).mkString.split("\n").mkString(" ")
+    val races = Source.fromFile(input).getLines.mkString(" ")
     parseInput(races).map(_.wins).product
 
   def part2(input: String = "input.txt"): Long =
-    val races = Source.fromFile(input).mkString.split("\n").map(_.replaceAll(" ", "")).mkString(" ")
+    val races = Source.fromFile(input).getLines.map(_.replaceAll(" ", "")).mkString(" ")
     parseInput(races)(0).wins
 }
 
