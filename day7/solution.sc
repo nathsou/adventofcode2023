@@ -60,15 +60,14 @@ object Day7 {
   extension  (hand: List[Card])
     def ty: Hand =
       val groups = hand.groupBy(identity).mapValues(_.length).values.toArray
-      val biggestGroup = groups.max
-
-      if biggestGroup == 5 then Hand.FiveOfAKind
-      else if biggestGroup == 4 then Hand.FourOfAKind
-      else if biggestGroup == 3 && groups.count(_ == 2) == 1 then Hand.FullHouse
-      else if biggestGroup == 3 then Hand.ThreeOfAKind
-      else if groups.count(_ == 2) == 2 then Hand.TwoPair
-      else if biggestGroup == 2 then Hand.OnePair
-      else Hand.HighCard
+      groups.max match
+        case 5 => Hand.FiveOfAKind
+        case 4 => Hand.FourOfAKind
+        case 3 if groups.count(_ == 2) == 1 => Hand.FullHouse
+        case 3 => Hand.ThreeOfAKind
+        case _ if groups.count(_ == 2) == 2 => Hand.TwoPair
+        case 2 => Hand.OnePair
+        case _ => Hand.HighCard
 
     def substitute(replaceWith: List[Card], acc: List[Card] = List()): List[Card] =
       hand match
