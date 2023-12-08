@@ -11,7 +11,7 @@ object Day7 {
     case FiveOfAKind
 
   enum Card:
-    case Wildcard
+    case Any
     case N2
     case N3
     case N4
@@ -42,14 +42,13 @@ object Day7 {
           case "9" => Card.N9
           case "T" => Card.T
           case "J" if !jokerAsWidlcard => Card.J
-          case "J" if jokerAsWidlcard => Card.Wildcard
+          case "J" if jokerAsWidlcard => Card.Any
           case "Q" => Card.Q
           case "K" => Card.K
           case "A" => Card.A
         ).toList
 
-        val b = bid.trim.toInt
-        Bid(h, b)
+        Bid(h, bid.trim.toInt)
       }.toList
 
   def combinationsWithRepetitions[T](l: List[T], n: Int): List[List[T]] = n match
@@ -73,19 +72,16 @@ object Day7 {
       hand match
         case Nil => acc
         case c :: cs => c match
-          case Card.Wildcard => cs.substitute(replaceWith, replaceWith.head :: acc)
+          case Card.Any => cs.substitute(replaceWith, replaceWith.head :: acc)
           case _ => cs.substitute(replaceWith, c :: acc)
 
     def typeWithWildcards: Hand =
-      hand.count(_ == Card.Wildcard) match
+      hand.count(_ == Card.Any) match
         case 0 => hand.ty
         case count => combinationsWithRepetitions(
-        List(
-          Card.N2, Card.N3, Card.N4, Card.N5, Card.N6, Card.N7, Card.N8,
-          Card.N9, Card.T, Card.J, Card.Q, Card.K, Card.A,
-        ),
-        count
-      ).map(hand.substitute(_)).map(_.ty).maxBy(_.ordinal)
+            Card.values.filter(_ != Card.Any).toList,
+            count
+          ).map(hand.substitute(_)).map(_.ty).maxBy(_.ordinal)
       
     def cmp(hand2: List[Card]): Boolean =
       val h1ty = hand.typeWithWildcards.ordinal
@@ -111,5 +107,5 @@ object Day7 {
     bids.zipWithIndex.map((b, i) => b.bid * (i + 1)).sum
 }
 
-println(Day7.part1("input.txt"))
-println(Day7.part2("input.txt"))
+println(Day7.part1())
+println(Day7.part2())
