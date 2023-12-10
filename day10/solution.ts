@@ -1,11 +1,11 @@
 import { readFileSync } from "fs";
-import { Graph, dijkstra } from './graphs';
+import { Graph, bfs, dijkstra } from "./graphs";
 
-const input = readFileSync("input.txt", "utf8");
+const input = readFileSync('input.txt', 'utf8');
 const START_PIPE = 'L';  // depends on the input
 
 function parseMaze(input: string): { maze: Maze, startX: number, startY: number } {
-    const maze = input.split("\n").map((line) => line.split(''));
+    const maze = input.split('\n').map((line) => line.split(''));
     const [startX, startY] = startPosition(maze);
     maze[startY][startX] = START_PIPE;
     return { maze, startX, startY };
@@ -17,13 +17,13 @@ type Dir = 'N' | 'S' | 'E' | 'W';
 
 function startPosition(maze: string[][]): Vec2 {
     for (let y = 0; y < maze.length; y++) {
-        const x = maze[y].indexOf("S");
+        const x = maze[y].indexOf('S');
         if (x !== -1) {
             return [x, y];
         }
     }
 
-    throw new Error("no start");
+    throw new Error('no start');
 }
 
 function label([x, y]: Vec2): string {
@@ -32,19 +32,19 @@ function label([x, y]: Vec2): string {
 
 function connections(pipe: string): Dir[] {
     switch (pipe) {
-        case "|": return ['N', 'S'];
-        case "-": return ['E', 'W'];
-        case "L": return ['N', 'E'];
-        case "J": return ['N', 'W'];
-        case "7": return ['S', 'W'];
-        case "F": return ['S', 'E'];
+        case '|': return ['N', 'S'];
+        case '-': return ['E', 'W'];
+        case 'L': return ['N', 'E'];
+        case 'J': return ['N', 'W'];
+        case '7': return ['S', 'W'];
+        case 'F': return ['S', 'E'];
         default: return [];
     }
 }
 
 function at(maze: string[][], x: number, y: number): string {
     if (x < 0 || y < 0 || y >= maze.length || x >= maze[y].length) {
-        return ".";
+        return '.';
     }
 
     return maze[y][x];
@@ -123,23 +123,6 @@ function canConnect(a: string, b: string, dir: Dir): boolean {
     return CONNECTIONS[a][dir].includes(b);
 }
 
-function mainLoop(g: Graph<string>, start: string) {
-    const queue = [start];
-    const visited = new Set<string>();
-
-    while (queue.length > 0) {
-        const u = queue.shift()!;
-        if (!visited.has(u)) {
-            visited.add(u);
-            for (const v of g.adjacentVertices(u)) {
-                queue.push(v);
-            }
-        }
-    }
-
-    return visited;
-}
-
 // a tile is enclosed if the number of wall in any direction is odd
 // LJ and F7 form two walls
 // L7 and FJ form one wall
@@ -160,7 +143,7 @@ function isEnclosed(maze: Maze, x0: number, y0: number, loop: Set<string>): bool
 function part1() {
     const { maze, startX, startY } = parseMaze(input);
     const g = buildGraph(maze);
-    const loop = mainLoop(g, label([startX, startY]));
+    const loop = bfs(g, label([startX, startY]));
     const dists = dijkstra(g, label([startX, startY]));
     return Math.max(
         ...[...dists.entries()]
@@ -172,7 +155,7 @@ function part1() {
 function part2() {
     const { maze, startX, startY } = parseMaze(input);
     const g = buildGraph(maze);
-    const loop = mainLoop(g, label([startX, startY]));
+    const loop = bfs(g, label([startX, startY]));
     let enclosedCount = 0;
 
     for (let y = 0; y < maze.length; y++) {

@@ -76,30 +76,6 @@ export const dijkstra = <Label = string>(g: Graph<Label>, source: Label) => {
     return distances;
 };
 
-// all-pairs shortest paths
-export const floydWarshall = <Label extends string | number>(g: Graph<Label>) => {
-    const dists = new Map<`${Label} -> ${Label}`, number>();
-
-    for (const v of g.getVertices()) {
-        for (const u of g.getVertices()) {
-            dists.set(`${u} -> ${v}`, g.getCost(u, v));
-        }
-    }
-
-    for (const k of g.getVertices()) {
-        for (const i of g.getVertices()) {
-            for (const j of g.getVertices()) {
-                const ikj = (dists.get(`${i} -> ${k}`) ?? Infinity) + (dists.get(`${k} -> ${j}`) ?? Infinity);
-                if (ikj < (dists.get(`${i} -> ${j}`) ?? Infinity)) {
-                    dists.set(`${i} -> ${j}`, ikj);
-                }
-            }
-        }
-    }
-
-    return dists;
-};
-
 export const bfs = <Label = string>(g: Graph<Label>, source: Label): Set<Label> => {
     const queue = [source];
     const visited = new Set<Label>();
