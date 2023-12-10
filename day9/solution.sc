@@ -3,7 +3,7 @@ import scala.io.Source
 object Day9 {
   type Input = IndexedSeq[IndexedSeq[Long]]
 
-  def parseInput(input: String, jokerAsWidlcard: Boolean = false): Input =
+  def parseInput(input: String): Input =
     val lines = Source.fromFile(input).getLines.toIndexedSeq
     lines.map(_.split(" ").map(_.toLong))
 
