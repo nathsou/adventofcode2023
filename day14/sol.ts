@@ -16,7 +16,6 @@ function topMostFreeSpace(platform: Platform, x: number, y: number): number {
     for (let j = y - 1; j >= 0; j--) {
         const cell = platform[j][x];
         if (cell === '.') {
-            // console.log(`found free space at ${x},${j}`, platform[j][x]);
             topMost = j;
         } else if (cell === '#' || cell === 'O') {
             break;
@@ -32,7 +31,6 @@ function leftMostFreeSpace(platform: Platform, x: number, y: number): number {
     for (let i = x - 1; i >= 0; i--) {
         const cell = platform[y][i];
         if (cell === '.') {
-            // console.log(`found free space at ${i},${y}`, platform[y][i]);
             leftMost = i;
         } else if (cell === '#' || cell === 'O') {
             break;
@@ -48,7 +46,6 @@ function rightMostFreeSpace(platform: Platform, x: number, y: number): number {
     for (let i = x + 1; i < platform[y].length; i++) {
         const cell = platform[y][i];
         if (cell === '.') {
-            // console.log(`found free space at ${i},${y}`, platform[y][i]);
             rightMost = i;
         } else if (cell === '#' || cell === 'O') {
             break;
@@ -64,7 +61,6 @@ function bottomMostFreeSpace(platform: Platform, x: number, y: number): number {
     for (let j = y + 1; j < platform.length; j++) {
         const cell = platform[j][x];
         if (cell === '.') {
-            // console.log(`found free space at ${x},${j}`, platform[j][x]);
             bottomMost = j;
         } else if (cell === '#' || cell === 'O') {
             break;
@@ -79,11 +75,9 @@ function tiltNorth(platform: Platform): void {
         for (let i = 0; i < platform[j].length; i++) {
             if (platform[j][i] === 'O') {
                 const newRow = topMostFreeSpace(platform, i, j);
-                // console.log(`tilting ${i},${j} to ${i},${newRow}`);
                 if (newRow === j) continue;
                 platform[newRow][i] = 'O';
                 platform[j][i] = '.';
-                // showPlatform(platform);
             }
         }
     }
@@ -132,11 +126,6 @@ function formatPlatform(platform: Platform): string {
     return platform.map(row => row.join('')).join('\n');
 }
 
-function showPlatform(platform: Platform): void {
-    console.log(formatPlatform(platform));
-    console.log();
-}
-
 function getTotalLoad(platform: Platform): number {
     let totalLoad = 0;
 
@@ -158,14 +147,12 @@ function part1() {
     return getTotalLoad(platform);
 }
 
-function titleCycle(platform: Platform) {
+function tiltCycle(platform: Platform) {
     tiltNorth(platform);
     tiltWest(platform);
     tiltSouth(platform);
     tiltEast(platform);
 }
-
-// part1();
 
 function part2() {
     const platform = parseInput(input);
@@ -186,7 +173,7 @@ function part2() {
             seen.set(hash, [i]);
         }
 
-        titleCycle(platform);
+        tiltCycle(platform);
         i += 1;
     }
 
