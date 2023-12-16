@@ -17,24 +17,55 @@ type Beam = {
 
 const h = (x: number, y: number) => `${x}:${y}`;
 
+type Dir = '<' |  '>' | '^' | 'v' | '.';
+
+function getDir(dx: number, dy: number): Dir {
+    if (dx === 1 && dy === 0) {
+        return '>';
+    }
+
+    if (dx === -1 && dy === 0) {
+        return '<';
+    }
+
+    if (dx === 0 && dy === 1) {
+        return 'v';
+    }
+
+    if (dx === 0 && dy === -1) {
+        return '^';
+    }
+
+    return '.';
+}
+
+function pushMap<K, V>(key: K, value: V, map: Map<K, V[]>) {
+    if (!map.has(key)) {
+        map.set(key, []);
+    }
+
+    map.get(key)!.push(value);
+}
+
 function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
-    const energized = new Map<string, number>();
+    const energized = new Map<string, Dir[]>();
     const beams: Beam[] = [startBeam];
 
     const width = tiles[0].length;
     const height = tiles.length;
-    // let steps = 100;
 
     while (beams.length > 0) {
         for (let i = beams.length - 1; i >= 0; i--) {
             const b = beams[i];
-            if ((energized.get(h(b.x, b.y)) ?? 0) > 100 ) {
-                // console.log('already energized', b.x, b.y, b.dx, b.dy);
+            const key = h(b.x, b.y);
+            const dir = getDir(b.dx, b.dy);
+            if (energized.get(key)?.includes(dir)) {
                 beams.splice(i, 1);
+                continue;
             }
 
             if (b.x >= 0 && b.x < width && b.y >= 0 && b.y < height) {
-                energized.set(h(b.x, b.y), (energized.get(h(b.x, b.y)) ?? 0) + 1);
+                pushMap(key, dir, energized);
                 const tile = tiles[b.y][b.x];
 
                 switch (tile) {
@@ -43,7 +74,6 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                         b.y += b.dy;
                         break;
                     case '/': {
-                        // log('splitting /', b.x, b.y, b.dx, b.dy);
                         const prevDx = b.dx;
                         const prevDy = b.dy;
 
@@ -52,7 +82,6 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
 
                         b.x += b.dx;
                         b.y += b.dy;
-                        // log('result', b.x, b.y, b.dx, b.dy);
                         break;
                     }
                     case '\\': {
@@ -67,11 +96,8 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                     }
                     case '|':
                         if (b.dx !== 0) {
-                            // log('splitting |', b.x, b.y, b.dx, b.dy);
-                            // remove this beam
                             beams.splice(i, 1);
 
-                            // add new beams
                             beams.push({
                                 x: b.x,
                                 y: b.y - 1,
@@ -92,11 +118,8 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                         break;
                     case '-':
                         if (b.dy !== 0) {
-                            // log('splitting -', b.x, b.y, b.dx, b.dy);
-                            // remove this beam
                             beams.splice(i, 1);
 
-                            // add new beams
                             beams.push({
                                 x: b.x - 1,
                                 y: b.y,
@@ -117,14 +140,10 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                         break;
                 }
             } else {
-                // log('out of bounds', b.x, b.y, b.dx, b.dy);
                 beams.splice(i, 1);
             }
         }
     }
-
-    // log(drawTiles(tiles, energized));
-    // log(energized.size);
 
     return energized.size;
 }
@@ -139,30 +158,15 @@ function part1() {
     });
 }
 
-function drawTiles(tiles: Tile[][], energized: Map<string, number>) {
-    const tilesCopy: (Tile | '#')[][] = tiles.map(line => [...line]);
-
-    for (const tile of energized.keys()) {
-        const [x, y] = tile.split(':').map(Number);
-        if (tilesCopy[y][x] === '.') {
-            tilesCopy[y][x] = '#';
-        }
-    }
-
-    return tilesCopy.map(line => line.join('')).join('\n');
-}
-
 function part2() {
     const tiles = parseTiles(inputText);
     const width = tiles[0].length;
     const height = tiles.length;
 
     let maxEnergy = 0;
-    let maxIndex = -1;
 
     // left edge
     for (let y = 0; y < height; y++) {
-        log(`left edge ${y}/${height}`);
         const energy = countEnergizedTiles(tiles, {
             x: 0,
             y,
@@ -172,13 +176,11 @@ function part2() {
 
         if (energy > maxEnergy) {
             maxEnergy = energy;
-            maxIndex = y;
         }
     }
 
     // right edge
     for (let y = 0; y < height; y++) {
-        log(`right edge ${y}/${height}`);
         const energy = countEnergizedTiles(tiles, {
             x: width - 1,
             y,
@@ -188,14 +190,12 @@ function part2() {
 
         if (energy > maxEnergy) {
             maxEnergy = energy;
-            maxIndex = y;
         }
     }
 
 
     // top edge
     for (let x = 0; x < width; x++) {
-        log(`top edge ${x}/${width}`);
         const energy = countEnergizedTiles(tiles, {
             x,
             y: 0,
@@ -205,13 +205,11 @@ function part2() {
 
         if (energy > maxEnergy) {
             maxEnergy = energy;
-            maxIndex = x;
         }
     }
 
     // bottom edge
     for (let x = 0; x < width; x++) {
-        log(`bottom edge ${x}/${width}`);
         const energy = countEnergizedTiles(tiles, {
             x,
             y: height - 1,
@@ -221,7 +219,6 @@ function part2() {
 
         if (energy > maxEnergy) {
             maxEnergy = energy;
-            maxIndex = x;
         }
     }
 
