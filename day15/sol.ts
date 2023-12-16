@@ -37,7 +37,7 @@ function hash(str: string): number {
 }
 
 class HashMap {
-    boxes: { label:string, value: number }[][];
+    boxes: { label: string, value: number }[][];
     constructor() {
         this.boxes = [];
 
