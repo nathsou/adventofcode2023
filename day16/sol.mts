@@ -1,41 +1,19 @@
 
-
 type Tile = '.' | '/' | '\\' | '|' | '-';
+type Beam = { x: number, y: number, dx: number, dy: number };
+type Dir = '<' | '>' | '^' | 'v' | '.';
 const inputText = await Bun.file('input.txt').text();
-const log = console.log;
+const h = (x: number, y: number) => `${x}:${y}`;
 
 function parseTiles(input: string): Tile[][] {
     return input.split('\n').map(line => line.split('') as Tile[]);
 }
 
-type Beam = {
-    x: number,
-    y: number,
-    dx: number,
-    dy: number,
-};
-
-const h = (x: number, y: number) => `${x}:${y}`;
-
-type Dir = '<' |  '>' | '^' | 'v' | '.';
-
 function getDir(dx: number, dy: number): Dir {
-    if (dx === 1 && dy === 0) {
-        return '>';
-    }
-
-    if (dx === -1 && dy === 0) {
-        return '<';
-    }
-
-    if (dx === 0 && dy === 1) {
-        return 'v';
-    }
-
-    if (dx === 0 && dy === -1) {
-        return '^';
-    }
-
+    if (dx === 1 && dy === 0) return '>';
+    if (dx === -1 && dy === 0) return '<';
+    if (dx === 0 && dy === 1) return 'v';
+    if (dx === 0 && dy === -1) return '^';
     return '.';
 }
 
@@ -47,37 +25,38 @@ function pushMap<K, V>(key: K, value: V, map: Map<K, V[]>) {
     map.get(key)!.push(value);
 }
 
+function swapRemove(elems: unknown[], index: number): void {
+    if (elems.length <= 1) { elems.pop(); } else { elems[index] = elems.pop()!; }
+}
+
 function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
     const energized = new Map<string, Dir[]>();
     const beams: Beam[] = [startBeam];
-
     const width = tiles[0].length;
     const height = tiles.length;
 
     while (beams.length > 0) {
-        for (let i = beams.length - 1; i >= 0; i--) {
+        for (let i = 0; i < beams.length; i++) {
             const b = beams[i];
             const key = h(b.x, b.y);
             const dir = getDir(b.dx, b.dy);
-            if (energized.get(key)?.includes(dir)) {
-                beams.splice(i, 1);
-                continue;
-            }
+            const outOfBounds = b.x < 0 || b.x >= width || b.y < 0 || b.y >= height;
+            const remove = (index: number) => swapRemove(beams, index);
 
-            if (b.x >= 0 && b.x < width && b.y >= 0 && b.y < height) {
+            if (outOfBounds || energized.get(key)?.includes(dir)) {
+                remove(i);
+            } else {
                 pushMap(key, dir, energized);
-                const tile = tiles[b.y][b.x];
 
-                switch (tile) {
+                switch (tiles[b.y][b.x]) {
                     case '.':
                         b.x += b.dx;
                         b.y += b.dy;
                         break;
                     case '/': {
                         const prevDx = b.dx;
-                        const prevDy = b.dy;
 
-                        b.dx = -prevDy;
+                        b.dx = -b.dy;
                         b.dy = -prevDx;
 
                         b.x += b.dx;
@@ -86,8 +65,8 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                     }
                     case '\\': {
                         const prevDx = b.dx;
-                        const prevDy = b.dy;
-                        b.dx = prevDy;
+
+                        b.dx = b.dy;
                         b.dy = prevDx;
 
                         b.x += b.dx;
@@ -96,21 +75,21 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                     }
                     case '|':
                         if (b.dx !== 0) {
-                            beams.splice(i, 1);
-
-                            beams.push({
-                                x: b.x,
-                                y: b.y - 1,
-                                dx: 0,
-                                dy: -1,
-                            });
-
-                            beams.push({
-                                x: b.x,
-                                y: b.y + 1,
-                                dx: 0,
-                                dy: 1,
-                            });
+                            remove(i);
+                            beams.push(
+                                {
+                                    x: b.x,
+                                    y: b.y - 1,
+                                    dx: 0,
+                                    dy: -1,
+                                },
+                                {
+                                    x: b.x,
+                                    y: b.y + 1,
+                                    dx: 0,
+                                    dy: 1,
+                                }
+                            );
                         } else {
                             b.x += b.dx;
                             b.y += b.dy;
@@ -118,29 +97,27 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
                         break;
                     case '-':
                         if (b.dy !== 0) {
-                            beams.splice(i, 1);
-
-                            beams.push({
-                                x: b.x - 1,
-                                y: b.y,
-                                dx: -1,
-                                dy: 0,
-                            });
-
-                            beams.push({
-                                x: b.x + 1,
-                                y: b.y,
-                                dx: 1,
-                                dy: 0,
-                            });
+                            remove(i);
+                            beams.push(
+                                {
+                                    x: b.x - 1,
+                                    y: b.y,
+                                    dx: -1,
+                                    dy: 0,
+                                },
+                                {
+                                    x: b.x + 1,
+                                    y: b.y,
+                                    dx: 1,
+                                    dy: 0,
+                                }
+                            );
                         } else {
                             b.x += b.dx;
                             b.y += b.dy;
                         }
                         break;
                 }
-            } else {
-                beams.splice(i, 1);
             }
         }
     }
@@ -150,80 +127,28 @@ function countEnergizedTiles(tiles: Tile[][], startBeam: Beam) {
 
 function part1() {
     const tiles = parseTiles(inputText);
-    return countEnergizedTiles(tiles, {
-        x: 0,
-        y: 0,
-        dx: 1,
-        dy: 0,
-    });
+    return countEnergizedTiles(tiles, { x: 0, y: 0, dx: 1, dy: 0 });
 }
 
 function part2() {
     const tiles = parseTiles(inputText);
     const width = tiles[0].length;
     const height = tiles.length;
-
     let maxEnergy = 0;
 
-    // left edge
-    for (let y = 0; y < height; y++) {
-        const energy = countEnergizedTiles(tiles, {
-            x: 0,
-            y,
-            dx: 1,
-            dy: 0,
-        });
-
-        if (energy > maxEnergy) {
-            maxEnergy = energy;
+    function traverseEdge(startX: number, startY: number, dx: number, dy: number, dirX: number, dirY: number): void {
+        for (let x = startX, y = startY; x >= 0 && x < width && y >= 0 && y < height; x += dx, y += dy) {
+            maxEnergy = Math.max(maxEnergy, countEnergizedTiles(tiles, { x, y, dx: dirX, dy: dirY }));
         }
     }
 
-    // right edge
-    for (let y = 0; y < height; y++) {
-        const energy = countEnergizedTiles(tiles, {
-            x: width - 1,
-            y,
-            dx: -1,
-            dy: 0,
-        });
-
-        if (energy > maxEnergy) {
-            maxEnergy = energy;
-        }
-    }
-
-
-    // top edge
-    for (let x = 0; x < width; x++) {
-        const energy = countEnergizedTiles(tiles, {
-            x,
-            y: 0,
-            dx: 0,
-            dy: 1,
-        });
-
-        if (energy > maxEnergy) {
-            maxEnergy = energy;
-        }
-    }
-
-    // bottom edge
-    for (let x = 0; x < width; x++) {
-        const energy = countEnergizedTiles(tiles, {
-            x,
-            y: height - 1,
-            dx: 0,
-            dy: -1,
-        });
-
-        if (energy > maxEnergy) {
-            maxEnergy = energy;
-        }
-    }
+    traverseEdge(0, 0, 1, 0, 0, 1); // top edge
+    traverseEdge(0, 0, 0, 1, 1, 0); // left edge
+    traverseEdge(width - 1, height - 1, -1, 0, 0, -1); // bottom edge
+    traverseEdge(width - 1, height - 1, 0, -1, -1, 0); // right edge
 
     return maxEnergy;
 }
 
-log(part1());
-log(part2());
+console.log(part1());
+console.log(part2());
