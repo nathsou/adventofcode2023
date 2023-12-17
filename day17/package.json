@@ -1,0 +1,11 @@
+{
+  "name": "day16",
+  "module": "sol.mts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
