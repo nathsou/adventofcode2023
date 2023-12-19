@@ -47,7 +47,12 @@ object Day18 {
       perimeter += line.len
       points += ((x, y))
 
-    // half of the perimeter isn't accounted for, i guess
+    // we can visualize the points as the center of 1x1 cells in a grid
+    // the area of the polygon is the number of cells inside the polygon
+    // so it is missing some area around the edges
+    // the missing area is 0.5 (half the area of a cell) for each cell around the perimeter
+    // plus 0.25 for each corner cell
+    // counter-clockwise and clockwise corners sum up to 1 (unit of area)
     interiorArea(points) + perimeter / 2 + 1
 
   // for the first solution, I used a flood fill
