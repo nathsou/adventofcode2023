@@ -115,31 +115,6 @@ object Day19 {
 
       intervals
 
-  def merge(intervals: Seq[Interval]): Seq[Interval] =
-    val sorted = intervals.sortBy(_.min)
-    val merged = ArrayBuffer[Interval]()
-    var current = sorted(0)
-
-    for i <- 1 until sorted.length do
-      val next = sorted(i)
-      if next.min <= current.max then
-        current.max = next.max
-      else
-        merged += current
-        current = next
-
-    merged += current
-    merged.toSeq
-
-  extension (intervals: Seq[Intervals])
-    def mergeAll() =
-      val x = merge(intervals.map(_.x))
-      val m = merge(intervals.map(_.m))
-      val a = merge(intervals.map(_.a))
-      val s = merge(intervals.map(_.s))
-      
-      (x, m, a, s)
-
   def acceptedConditions(
     workflows: Map[String, Workflow],
   ) = {
