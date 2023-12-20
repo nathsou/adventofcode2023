@@ -62,7 +62,6 @@ object Day19 {
         state = run(w)
 
       state
-
     
   def part1(input: String = "input.txt") =
     val (workflows, parts) = parseInput(input)
@@ -115,9 +114,7 @@ object Day19 {
 
       intervals
 
-  def acceptedConditions(
-    workflows: Map[String, Workflow],
-  ) = {
+  def acceptedConditions(workflows: Map[String, Workflow]) = {
     val accepted = ArrayBuffer[Seq[Cond]]()
     val stack = Stack[(String, Seq[Cond])]()
     stack.push(("in", Seq()))
