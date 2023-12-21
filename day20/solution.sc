@@ -1,8 +1,5 @@
 import scala.io.Source
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.Map
-import scala.collection.mutable.Queue
-import scala.collection.mutable.Set
+import scala.collection.mutable.{ArrayBuffer, Map, Queue, Set}
 
 object Day20 {
   case class Box(var ref: Boolean)
@@ -16,7 +13,7 @@ object Day20 {
 
   def parseConnection(line: String): (Module, Connection) = line match
     case s"${from} -> ${to}" => {
-      val con =  Connection(from, to.split(", "))
+      val con = Connection(from, to.split(", "))
       val mod = from match {
         case s"%$name" => Module.FlipFlop(name, Box(false))
         case s"&$name" => Module.Conjunction(name, Box(false), Map[String, Boolean]())
