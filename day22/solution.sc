@@ -1,6 +1,5 @@
 import scala.io.Source
 import scala.collection.mutable.{ArrayBuffer, Map, Set, Stack}
-import os.remove
 
 object Day22 {
   case class Vec3(x: Int, y: Int, z: Int)
@@ -51,7 +50,7 @@ object Day22 {
         
       lastValid
 
-  def fallDown(bricks: Seq[Brick]) = {
+  def fallDown(bricks: Seq[Brick]) =
     val sortedZ = bricks.sortBy(_.from.z)
     val stack = Stack[Brick]()
 
@@ -64,7 +63,6 @@ object Day22 {
       }
   
     stack
-  }
 
   extension (stack: Stack[Brick])
     def relations(): Relations =

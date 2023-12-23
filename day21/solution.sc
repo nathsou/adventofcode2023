@@ -168,7 +168,7 @@ object Day21 {
       var occupied = Set[(Int, Int)]()
       var normalized = ArrayBuffer[(Int, Int)]()
       occupied += g.startingPosition()
-      println(s"Starting pos: ${occupied}")
+      // println(s"Starting pos: ${occupied}")
 
       for (i <- 1 to steps) {
         val newOccupied = Set[(Int, Int)]()
@@ -327,7 +327,7 @@ object Day21 {
         val minY = minYs.getOrElse(x, Int.MaxValue)
         val maxY = maxYs.getOrElse(x, Int.MinValue)
 
-        x <= minX || x >= maxX || y <= minY || y >= maxY
+        x == minX || x == maxX || y == minY || y == maxY
       }
 
       def isInside(x: Int, y: Int) = {
@@ -339,11 +339,17 @@ object Day21 {
         x >= minX && x <= maxX && y >= minY && y <= maxY
       }
 
+      var even = 0
+      var odd = 0
+
       for (i <- 1 to steps) {
         val newOccupied = Set[(Int, Int)]()
+        // minXs.clear()
+        // maxXs.clear()
+        // minYs.clear()
+        // maxYs.clear()
         
         for ((x, y) <- occupied) {
-
           for ((dx, dy) <- directions) {
             val newX = x + dx
             val newY = y + dy
@@ -357,40 +363,122 @@ object Day21 {
               val minY = minYs.getOrElse(newX, Int.MaxValue)
               val maxY = maxYs.getOrElse(newX, Int.MinValue)
 
-              if (newX < minX) minXs(newY) = newX
-              if (newX > maxX) maxXs(newY) = newX
-              if (newY < minY) minYs(newX) = newY
-              if (newY > maxY) maxYs(newX) = newY
+              var onBoundary = false
 
-              newOccupied += ((newX, newY))
+              if (newX < minX) {
+                minXs(newY) = newX
+                onBoundary = true
+              }
+
+              if (newX > maxX) {
+                maxXs(newY) = newX
+                onBoundary = true
+              }
+
+              if (newY < minY) {
+                minYs(newX) = newY
+                onBoundary = true
+              }
+
+              if (newY > maxY) {
+                maxYs(newX) = newY
+                onBoundary = true
+              }
+
+              if (onBoundary) {
+                newOccupied += ((newX, newY))
+              }
             }
           }
         }
 
-        occupied = newOccupied.filter(t => isOnBoundary(t._1, t._2))
+        if (i % 2 == 0) {
+          even += newOccupied.size
+        } else {
+          odd += newOccupied.size
+        }
+
+        // occupied = newOccupied.filter(t => isOnBoundary(t._1, t._2))
+        occupied = newOccupied
       }
 
       var count = 0L
-      var occs = Set[(Int, Int)]()
+      // var occs = Set[(Int, Int)]()
+
+      // def getMinMaxX(y: Int) = {
+      //   val minX = minXs.getOrElse(y, Int.MaxValue)
+      //   val maxX = maxXs.getOrElse(y, Int.MinValue)
+      //   (minX.min(maxX), minX.max(maxX))
+      // }
+
+      // val minY = minYs.values.min
+      // val maxY = maxYs.values.max
+
+      // for (y <- minY to maxY) {
+      //   if (minXs.contains(y) || maxXs.contains(y)) {
+      //     val (minX, maxX) = getMinMaxX(y)
+
+      //     if (minX == maxX) {
+      //       if (isInside(minX, y) && g.at2(minX, y, width, height) != "#") {
+      //         count += 1
+      //         occs += ((minX, y))
+      //       }
+      //     } else {
+      //       for (x <- minX to maxX by 2) {
+      //         if (isInside(x, y) && g.at2(x, y, width, height) != "#") {
+      //           count += 1
+      //           occs += ((x, y))
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
+      println(s"walk4: ${even}:${odd}")
+      // println(g.showRepeating(occs))
+
+      (occupied, count)
+    }
+  
+    def freeSpots(): (Long, Long) = {
+      val width = g(0).length
+      val height = g.length
+      var even = 0L
+      var odd = 0L
 
       for (y <- 0 until height) {
-        if (minXs.contains(y) && maxXs.contains(y)) {
-          val minX = minXs(y)
-          val maxX = maxXs(y)
-
-          for (x <- minX to maxX by 2) {
-            if (isInside(x, y) && g.at2(x, y, width, height) != "#") {
-              count += 1
-              occs += ((x, y))
+        for (x <- 0 until width) {
+          val tile = g.at(x, y)
+          if (tile != "#") {
+            if ((x + y) % 2 == 0) {
+              even += 1
+            } else {
+              odd += 1
             }
           }
         }
       }
 
-      println("walk4:")
-      println(g.showRepeating(occs))
+      (even, odd)
+    }
 
-      (occupied, count)
+    def rotate45Degrees(): Garden = {
+      val n = g.length
+      val newGarden = ArrayBuffer[ArrayBuffer[String]]()
+
+      for (y <- 0 until n) {
+        val line = ArrayBuffer[String]()
+        for (x <- 0 until n) {
+          val newX = x + y + 1
+          val newY = y - x + n
+          val tile = g.at(newX, newY)
+          line += tile
+        }
+
+        newGarden += line
+      }
+
+      newGarden
     }
 
 
@@ -404,24 +492,30 @@ object Day21 {
   
   def part2(input: String) = {
     val garden = parseInput(input)
-    val n = 10
-    val (frontier, count4) = garden.walk4(n)
+    val side = garden.length
+    val n = 5000
+    val (even, odd) = garden.freeSpots()
+    val r = n.toFloat / side.toFloat
+    var m = r * r * odd * 2
+    println(s"even: ${even}, odd: ${odd}, r: $r, m: $m")
+
+    // val (frontier, count4) = garden.walk4(n)
     // val f = garden.walk2(n)
     // val walls = garden.map(_.map(tile => if tile != "#" then 0 else 1).sum).sum
-    val start = garden.startingPosition()
-    val actual = garden.walk(n)
+    // val start = garden.startingPosition()
+    // val actual = garden.walk(n)
     // println(s"actual: ${actual}")
-    println(s"start: ${start}")
+    // println(s"start: ${start}")
     // println(s"yo: ${yo(garden, n)}")
     // println(occupied)
     // println(garden.showRepeating(occupied))
 
-    println("actual:")
-    println(garden.showRepeating(actual))
+    // println("\nactual:")
+    // println(garden.showRepeating(actual))
 
-    var occupiedCells = 0L
-    val width = garden(0).length
-    val height = garden.length
+    // var occupiedCells = 0L
+    // val width = garden(0).length
+    // val height = garden.length
     // val occs = Set[(Int, Int)]()
 
     // for ((y, (minX, maxX)) <- frontier) {
@@ -434,8 +528,8 @@ object Day21 {
     //   }
     // }
 
-    println("\nfrontier:")
-    println(garden.showRepeating(frontier))
+    // println("\nfrontier:")
+    // println(garden.showRepeating(frontier))
 
     // var cells = garden.showRepeating(actual).split("\n").map(_.split("").to(ArrayBuffer))
 
@@ -452,7 +546,7 @@ object Day21 {
     // val diff = actual.diff(occs) ++ occs.diff(actual)
     // println(diff)
 
-    (count4, actual.size)
+    // actual.size
   }
 }
 
