@@ -27,6 +27,7 @@ object Day23 {
           if (dist > max) {
             max = dist
           }
+
           if (isPart2) {
             println(s"found path with dist $dist, current max is $max")
           }
