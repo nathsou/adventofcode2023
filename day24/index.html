@@ -1,0 +1,143 @@
+<html>
+
+<head>
+    <title>Day 24</title>
+</head>
+
+<body>
+    <style>
+        body {
+            background-color: black;
+        }
+    </style>
+    <canvas id="cnv" width="1000" height="800"></canvas>
+    <script>
+        const cnv = document.getElementById('cnv');
+        const ctx = cnv.getContext('2d');
+
+        const cell = 30; // px
+        const offset = { x: 0, y: 0 };
+
+        function drawLine(x1, y1, x2, y2, color = 'red') {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x1 * cell, y1 * cell);
+            ctx.lineTo(x2 * cell, y2 * cell);
+            ctx.stroke();
+        }
+
+        const lines = [
+            { pos: { x: 19, y: 13, z: 30 }, dir: { x: -2, y: 1, z: -2 } },
+            { pos: { x: 18, y: 19, z: 22 }, dir: { x: -1, y: -1, z: -2 } },
+            { pos: { x: 20, y: 25, z: 34 }, dir: { x: -2, y: -2, z: -4 } },
+            { pos: { x: 12, y: 31, z: 28 }, dir: { x: -1, y: -2, z: -1 } },
+            { pos: { x: 20, y: 19, z: 15 }, dir: { x: 1, y: -5, z: -3 } },
+        ];
+
+        function drawGrid() {
+            ctx.strokeStyle = '#ccc';
+            for (let i = 0; i <= cnv.width / cell; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cell, 0);
+                ctx.lineTo(i * cell, cnv.height);
+                ctx.stroke();
+            }
+
+            for (let i = 0; i <= cnv.height / cell; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * cell);
+                ctx.lineTo(cnv.width, i * cell);
+                ctx.stroke();
+            }
+        }
+
+        // drawGrid();
+
+        const colors = [
+            'tomato',
+            'orange',
+            'yellow',
+            'lime',
+            'cyan',
+            'red',
+        ];
+
+        const vec3 = (x, y, z = 0) => ({ x, y, z });
+
+        const sol = {
+            pos: vec3(24, 13, 10),
+            dir: vec3(-3, 1, 2),
+        };
+
+        [...lines, sol].forEach((line, index) => {
+            const t = 7;
+            const x2 = line.pos.x + line.dir.x * t;
+            const y2 = line.pos.y + line.dir.y * t;
+            const color = colors[Math.floor(index % colors.length)];
+            drawLine(line.pos.x, line.pos.y, x2, y2, color);
+        });
+
+        function* exclusivePairs(as, bs) {
+            for (let i = 0; i < as.length; i++) {
+                for (let j = i + 1; j < bs.length; j++) {
+                    yield [as[i], bs[j]];
+                }
+            }
+        }
+
+        function* pairs(as, bs) {
+            for (let i = 0; i < as.length; i++) {
+                for (let j = 0; j < bs.length; j++) {
+                    yield [as[i], bs[j]];
+                }
+            }
+        }
+
+        const ps = line => [1, 2, 3, 4, 5, 6, 7]
+            .map(t => vec3(line.pos.x + line.dir.x * t, line.pos.y + line.dir.y * t));
+
+        const coeffs = new Map();
+
+        function yo(line1, line2) {
+            const rs = new Set();
+            for (const [p0, p1] of pairs(ps(line1), ps(line2))) {
+                if (p0.x === p1.x && p0.y === p1.y) {
+                    continue;
+                }
+
+                const m = (p0.y - p1.y) / (p0.x - p1.x);
+                const dx = 1 / m;
+                const b = p0.y - m * p0.x;
+                if (Number.isInteger(dx) && Number.isInteger(b) && Number.isFinite(m) && Number.isFinite(b)) {
+                    const key = `${dx}:${b}`;
+                    const count = coeffs.get(key) ?? 0;
+                    coeffs.set(key, count + 1);
+                    rs.add(key);
+                }
+
+                drawLine(p0.x, p0.y, p1.x, p1.y, 'rgba(255, 255, 255, 0.1)');
+            }
+
+            return rs;
+        }
+
+        let inter = null;
+
+        for (const [line1, line2] of exclusivePairs(lines, lines)) {
+            if (line1 !== line2) {
+                const rs = yo(line1, line2);
+
+                if (inter == null) {
+                    inter = rs;
+                } else {
+                    inter = new Set([...inter].filter(x => rs.has(x)));
+                }
+            }
+        }
+
+        console.log(inter);
+    </script>
+</body>
+
+</html>
